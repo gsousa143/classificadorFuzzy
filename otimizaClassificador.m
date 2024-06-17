@@ -3,50 +3,26 @@ clear, clc;
 fis = readfis("clss.fis");
 
 %dados para otimização
-dados = readtable("./Classificação dos dados nuno novos.xlsx - Dados - Completos.csv");
-dados = dados(3:end,:); %retira cabeçario da tabela
-entradas = [dados.Var3,dados.Var4,dados.Var5,dados.Var6,dados.Var7]; %seleciona o valor de entrada na tabela
-saidas = [dados.Var8,dados.Var10,dados.Var11]; %seleciona as saidas na tabela
-classes = [dados.Var12]; %seleciona os valores da classificacao na tabela
-classes = cell2mat(classes); %transforma em matriz
-classes  = str2num(classes(:,2)); %transforma em uma matriz de dados numericos
-
+[entradas,saidas,classes] = lerPlanilha("Classificação dos dados nuno novos.xlsx");
+% [indices] = separaDadosTreino(entradas,saidas,classes);
+% entradas = entradas(indices,:);
+% saidas = saidas(indices,:);
+% classes = classes(indices,:);
 
 %parametros da otimização
-parametros.itMax = 500;
-parametros.tempoMax = Inf;
-parametros.NP =  100;
-parametros.info = 1;
-parametros.cr = 0.3;
-parametros.betta = 0.1;
-parametros.fM = 0.7;
-parametros.path = "custo.csv";
+itMax = 200;
+tempoMax = Inf;
+NP =  100;
 
+solucaoInicial  = ones(1,numel(fis.rule));
 
-solucaoInicial = [];
-limitesMax = [];
-limitesMin = [];
+limites = [
+    ones(1,numel(fis.rule));
+    zeros(1,numel(fis.rule))];
 
-numEntradas = size(fis.Inputs,2);
-numMF = size(fis.Input(1).MembershipFunctions,2);
-numSaidas = size(fis.Outputs,2);
-numClasses = size(fis.Output(1).mf,2);
-for i = 1:numEntradas
-    sd = fis.Input(i).mf(1).params(1);
-    range = fis.Input(i).Range;
-    for j = 1:numMF
-        solucaoInicial = [solucaoInicial,fis.Input(i).mf(j).params];
-        limitesMax = [limitesMax, sd*1.5, range(2)];
-        limitesMin = [limitesMin, sd*0.5, range(1)];
-    end
-end
+% [fopt, xopt] = pso(@(x) otimizacao(x,fis,entradas,classes), ... %OTIMIZAÇÃO
+%                                     limites, solucaoInicial,[],NP,itMax,Inf,true);
 
-
-limites = [limitesMax;limitesMin];
-
-[fopt, xopt] = GA(@(x) otimizaClassificador(x,fis,entradas,classes), limites, solucaoInicial, parametros);
-
-
-fis = attMF(fis,xopt);
+fis = attMF(fis,[0.31977258177681,0.198719138892732,0.173016784008038,0.735751835457557,0.447671021194062,0.466634589818059,0.201492569410789,0.360023792337804,0.415117839790718,0.321331637651895,0.249112835973128,0.498608039165355,0.818658266010564,0.729674827684468,0.566638415494162,0.37838008873899,0.539154112397358,0.23329142627668,0.380029464271747,0.502567420769532,0.290557703799223,0.563859992736109,0.461074284451339,0.375140595921408,0.315883600459108,0.311178391019456,0.935871740096009,0.239546065316454,0.542539007795225,0.242990529697307,0.789959288373568,0.201213888485526,0.249602875004789,0.596874577927122,0.335796501399995,0.673198013964366,0.784863067080469,0.508888684087126,0,0.0696684948779551,0.194670228685161,0.953531670155371,0.775016554315322,0.397816793179414,1,0.153174827899002,0.547085655864088,0.672802549015482,0.361885525742475,0.67752352604031,0.597505007042481,0.32399330208508,0.478025254430429,0.671637756084664,0.978344413930719,0.797628011595889,0.380876760727166,0.807485243031666,0.107912159601509,0.767356111815793,0,0.159542454370905,1,0.798014352027502,0.504176964043218,0.266486725666816,0.623900952919808,1,0.631142132903427,0.284912172201075,0.145443203727974,0.577855047643443,0.252847351736823,0.782053436385968,0.357035490612804,0.732558015764328,0,0.410629025684463,0.950907731368838,0.349634778133897])
 fis.Name = fis.Name+" Otimizado";
 writeFIS(fis,"clssOtm.fis");
