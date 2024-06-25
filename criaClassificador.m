@@ -32,7 +32,7 @@ fis = setRegras(fis,classes);
 fCusto = calculaFuncional(classificacao,pertinenciaClasse,classes);
 
 writeFIS(fis,"clss.fis");
-% plotfis(fis);
+
 
 
             

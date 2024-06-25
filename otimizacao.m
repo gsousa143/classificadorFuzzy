@@ -11,5 +11,5 @@ catch
     fCusto = Inf;
 
 end
-fCusto
+fprintf("\n funcional custo = %1.4f",fCusto);
 end
